@@ -107,21 +107,12 @@ class FocusDiff:
         return model
 
     def _register_empty_editor(self):
-        if self.version == "sd15":
-            from .backends.sd15.attention_utils import AttentionBase, register_attention_editor_diffusers
-        elif self.version == "sd21":
-            from .backends.cpamv21.attention_utils import AttentionBase, register_attention_editor_diffusers
-        else:
-            from .backends.cpamvxl.attention_utils import AttentionBase, register_attention_editor_diffusers
+        from .backends.attention_utils import AttentionBase, register_attention_editor_diffusers
+
         register_attention_editor_diffusers(self.model, AttentionBase(self.config.num_inference_steps))
 
     def _register_focus_editor(self, mask: torch.Tensor, do_erase: bool = False):
-        if self.version == "sd15":
-            from .backends.sd15.attention_utils import AttentionBase, register_attention_editor_diffusers
-        elif self.version == "sd21":
-            from .backends.cpamv21.attention_utils import AttentionBase, register_attention_editor_diffusers
-        else:
-            from .backends.cpamvxl.attention_utils import AttentionBase, register_attention_editor_diffusers
+        from .backends.attention_utils import AttentionBase, register_attention_editor_diffusers
 
         editor = FocusDiffAttentionControl(
             AttentionBase,

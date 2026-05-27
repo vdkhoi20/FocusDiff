@@ -10,10 +10,10 @@ from torchvision.utils import save_image
 from torchvision.io import read_image
 
 from diffusers import DDIMScheduler
+from focusdiff.backends.attention_utils import register_attention_editor_diffusers, AttentionBase
 from focusdiff.config import FocusDiffConfig, MODEL_PRESETS
 from focusdiff.backends.sd15.diffuser_utils import FocusDiffSD15Pipeline
 from focusdiff.backends.sd15.attention_control import FocusDiffSelfAttentionControlMask
-from focusdiff.backends.sd15.attention_utils import register_attention_editor_diffusers, AttentionBase
 from focusdiff.seed import seed_everything
 
 
