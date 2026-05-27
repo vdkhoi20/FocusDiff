@@ -32,6 +32,10 @@ class FocusDiff:
         self.config.device = device or self.config.device
         self.config.height = self.preset["height"]
         self.config.width = self.preset["width"]
+        if self.version == "sd21" and self.config.torch_dtype == "float16":
+            bf16_supported = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+            self.config.torch_dtype = "bfloat16" if bf16_supported else "float32"
+            print(f"SD2.1 v-prediction is unstable in float16 here; using {self.config.torch_dtype}.")
         self.model_path = model_path or self.preset["model_path"]
         seed_everything(self.config.seed)
         self.model = self._load_model()
@@ -178,6 +182,7 @@ class FocusDiff:
 
         self._register_focus_editor(focused_mask, do_erase=do_erase)
         prompts = ["", "", "", "", prompt]
+        debug_last_branch = None
         if self.version == "sd15":
             images = self.model(
                 prompts,
@@ -189,6 +194,7 @@ class FocusDiff:
                 DEVICE=self.config.device,
             )
             result = images[0]
+            debug_last_branch = images[-1]
         else:
             result = self.model.focusdiff_call(
                 prompt=prompts,
@@ -197,6 +203,7 @@ class FocusDiff:
                 ref_intermediates=source_intermediates,
                 guidance_scale=self.config.guidance_scale,
                 num_inference_steps=self.config.num_inference_steps,
+                debug_output_path=output_path,
             )
 
         if output_path is not None:
@@ -205,6 +212,9 @@ class FocusDiff:
                 from torchvision.utils import save_image
 
                 save_image(result, output_path)
+                if debug_last_branch is not None:
+                    debug_path = Path(output_path).with_name(f"{Path(output_path).stem}_branch_last{Path(output_path).suffix}")
+                    save_image(debug_last_branch, debug_path)
             else:
                 result.save(output_path)
         return result
@@ -232,7 +242,16 @@ class FocusDiff:
 
 
 @torch.no_grad()
-def _focusdiff_call_sd(self, prompt, latents, ref_intermediate_objects, ref_intermediates, guidance_scale=10.0, num_inference_steps=50):
+def _focusdiff_call_sd(
+    self,
+    prompt,
+    latents,
+    ref_intermediate_objects,
+    ref_intermediates,
+    guidance_scale=10.0,
+    num_inference_steps=50,
+    debug_output_path=None,
+):
     device = latents.device
     prompt_embeds, _ = self.encode_prompt(
         prompt=prompt,
@@ -253,13 +272,40 @@ def _focusdiff_call_sd(self, prompt, latents, ref_intermediate_objects, ref_inte
         noise_target = noise_uncond + guidance_scale * (noise_text - noise_uncond)
         noise = torch.cat([noise[:-2], noise_target[None]], dim=0)
         latents = self.scheduler.step(noise, t, latents, return_dict=False)[0]
-    image = self.vae.decode(latents[:1] / self.vae.config.scaling_factor, return_dict=False)[0]
+    needs_upcasting = self.vae.dtype == torch.float16
+    vae_dtype = self.vae.dtype
+    if needs_upcasting:
+        self.vae.to(dtype=torch.float32)
+    image_latents = latents[:1].to(dtype=self.vae.dtype) / self.vae.config.scaling_factor
+    image = self.vae.decode(image_latents, return_dict=False)[0]
+    debug_image = None
+    if debug_output_path is not None and latents.shape[0] > 3:
+        debug_latents = latents[3:4].to(dtype=self.vae.dtype) / self.vae.config.scaling_factor
+        debug_image = self.vae.decode(debug_latents, return_dict=False)[0]
+    if needs_upcasting:
+        self.vae.to(dtype=vae_dtype)
     image = self.image_processor.postprocess(image, output_type="pil")[0]
+    if debug_image is not None:
+        debug_image = self.image_processor.postprocess(debug_image, output_type="pil")[0]
+        debug_path = Path(debug_output_path).with_name(
+            f"{Path(debug_output_path).stem}_object_cfg_branch{Path(debug_output_path).suffix}"
+        )
+        debug_path.parent.mkdir(parents=True, exist_ok=True)
+        debug_image.save(debug_path)
     return image
 
 
 @torch.no_grad()
-def _focusdiff_call_sdxl(self, prompt, latents, ref_intermediate_objects, ref_intermediates, guidance_scale=10.0, num_inference_steps=50):
+def _focusdiff_call_sdxl(
+    self,
+    prompt,
+    latents,
+    ref_intermediate_objects,
+    ref_intermediates,
+    guidance_scale=10.0,
+    num_inference_steps=50,
+    debug_output_path=None,
+):
     device = latents.device
     height = self.default_sample_size * self.vae_scale_factor
     width = self.default_sample_size * self.vae_scale_factor
@@ -298,5 +344,43 @@ def _focusdiff_call_sdxl(self, prompt, latents, ref_intermediate_objects, ref_in
         noise_target = noise_uncond + guidance_scale * (noise_text - noise_uncond)
         noise = torch.cat([noise[:-2], noise_target[None]], dim=0)
         latents = self.scheduler.step(noise, t, latents, return_dict=False)[0]
-    image = self.vae.decode(latents[:1] / self.vae.config.scaling_factor, return_dict=False)[0]
-    return self.image_processor.postprocess(image, output_type="pil")[0]
+    needs_upcasting = self.vae.dtype == torch.float16 and getattr(self.vae.config, "force_upcast", False)
+    if needs_upcasting:
+        self.upcast_vae()
+        latents = latents.to(next(iter(self.vae.post_quant_conv.parameters())).dtype)
+    elif latents.dtype != self.vae.dtype and torch.backends.mps.is_available():
+        self.vae = self.vae.to(latents.dtype)
+
+    decode_latents = latents
+    image_latents = decode_latents[:1]
+    has_latents_mean = hasattr(self.vae.config, "latents_mean") and self.vae.config.latents_mean is not None
+    has_latents_std = hasattr(self.vae.config, "latents_std") and self.vae.config.latents_std is not None
+    if has_latents_mean and has_latents_std:
+        latents_mean = torch.tensor(self.vae.config.latents_mean).view(1, 4, 1, 1).to(image_latents.device, image_latents.dtype)
+        latents_std = torch.tensor(self.vae.config.latents_std).view(1, 4, 1, 1).to(image_latents.device, image_latents.dtype)
+        image_latents = image_latents * latents_std / self.vae.config.scaling_factor + latents_mean
+    else:
+        image_latents = image_latents / self.vae.config.scaling_factor
+
+    image = self.vae.decode(image_latents, return_dict=False)[0]
+    debug_image = None
+    if debug_output_path is not None and decode_latents.shape[0] > 3:
+        debug_latents = decode_latents[3:4]
+        if has_latents_mean and has_latents_std:
+            latents_mean = torch.tensor(self.vae.config.latents_mean).view(1, 4, 1, 1).to(debug_latents.device, debug_latents.dtype)
+            latents_std = torch.tensor(self.vae.config.latents_std).view(1, 4, 1, 1).to(debug_latents.device, debug_latents.dtype)
+            debug_latents = debug_latents * latents_std / self.vae.config.scaling_factor + latents_mean
+        else:
+            debug_latents = debug_latents / self.vae.config.scaling_factor
+        debug_image = self.vae.decode(debug_latents, return_dict=False)[0]
+    if needs_upcasting:
+        self.vae.to(dtype=torch.float16)
+    image = self.image_processor.postprocess(image, output_type="pil")[0]
+    if debug_image is not None:
+        debug_image = self.image_processor.postprocess(debug_image, output_type="pil")[0]
+        debug_path = Path(debug_output_path).with_name(
+            f"{Path(debug_output_path).stem}_object_cfg_branch{Path(debug_output_path).suffix}"
+        )
+        debug_path.parent.mkdir(parents=True, exist_ok=True)
+        debug_image.save(debug_path)
+    return image

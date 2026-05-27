@@ -52,9 +52,13 @@ def invert(
 
     image.convert("RGB")
     # 4. Chuẩn bị latent từ ảnh gốc (x_0)
-    image_tensor = self.image_processor.preprocess(image).to(device=device, dtype=prompt_embeds.dtype)
+    vae_dtype = self.vae.dtype
+    self.vae.to(dtype=torch.float32)
+    image_tensor = self.image_processor.preprocess(image).to(device=device, dtype=torch.float32)
     latent = self.vae.encode(image_tensor).latent_dist.sample(generator)
     latent = self.vae.config.scaling_factor * latent
+    self.vae.to(dtype=vae_dtype)
+    latent = latent.float()
 
     latents=[]
     # 5. Vòng lặp đảo ngược DDIM (thêm nhiễu)
@@ -65,6 +69,7 @@ def invert(
             t_next = timesteps.flip(0)[i + 1]
 
         latent_model_input = torch.cat([latent] * 2) if self.do_classifier_free_guidance else latent
+        latent_model_input = latent_model_input.to(dtype=self.unet.dtype)
         latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
 
         # Đầu ra của UNet bây giờ là 'v_pred'
@@ -73,7 +78,7 @@ def invert(
             t,
             encoder_hidden_states=prompt_embeds,
             cross_attention_kwargs=self.cross_attention_kwargs,
-        ).sample
+        ).sample.float()
 
         if self.do_classifier_free_guidance:
             v_pred_uncond, v_pred_text = v_pred.chunk(2)
@@ -81,7 +86,7 @@ def invert(
 
         # ==================== THAY ĐỔI QUAN TRỌNG Ở ĐÂY ====================
         # Lấy các giá trị alpha từ scheduler
-        alpha_prod_t = self.scheduler.alphas_cumprod[t]
+        alpha_prod_t = self.scheduler.alphas_cumprod[t].to(device=device, dtype=latent.dtype)
         beta_prod_t = 1 - alpha_prod_t
         
         # Sử dụng công thức của v-prediction để tính x0 và epsilon dự đoán
@@ -90,7 +95,7 @@ def invert(
         # ===================================================================
 
         # Tính toán x_{t+1} sử dụng x0 và epsilon đã được suy ra ở trên
-        alpha_prod_t_next = self.scheduler.alphas_cumprod[t_next]
+        alpha_prod_t_next = self.scheduler.alphas_cumprod[t_next].to(device=device, dtype=latent.dtype)
         latent = alpha_prod_t_next.sqrt() * pred_original_sample + (1 - alpha_prod_t_next).sqrt() * pred_epsilon
         
         latents.append(latent)

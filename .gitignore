@@ -10,10 +10,12 @@ venv/
 *.egg-info/
 
 # Local datasets, papers, and demo binaries are kept outside the public code repo.
-BenchMark_Blur/
 BenchMark_Blur_panora/
 scenes_360/
 *.jpg
 *.jpeg
 *.png
 *.pdf
+
+!BenchMark_Blur/
+!BenchMark_Blur/**

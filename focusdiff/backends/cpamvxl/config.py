@@ -13,7 +13,7 @@ class Config:
     GUIDANCE_SCALE=7.5
     
     STEP_QUERY=7
-    LAYER_QUERY=17
+    LAYER_QUERY=100
     
     STEP_CHANGE_MASK=1
 

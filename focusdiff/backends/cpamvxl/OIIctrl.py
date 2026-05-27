@@ -117,11 +117,6 @@ class OIISelfAttentionControlMask(OIISelfAttentionControl):
         H = W = int(np.sqrt(q.shape[1]))
         out_self_attn=super().forward(q, k, v, sim, attn, is_cross, place_in_unet, num_heads,**kwargs)
         if is_cross:
-            return out_self_attn
-
-        
-        
-        
             mask_fg_cross = self.getMask(H,W)
             
             # breakpoint()
