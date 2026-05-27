@@ -1,147 +1,113 @@
-import os
-import shutil
 import tempfile
-import numpy as np
+from functools import lru_cache
+from io import BytesIO
 from pathlib import Path
-from PIL import Image
+from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
-# Import the corrected image processing class
-from run_pano import ImageInversionProcessor
+from focusdiff import FocusDiff, FocusDiffConfig
 
 
-app = FastAPI()
+app = FastAPI(title="FocusDiff API")
 
-# Initialize the processor once for the application lifetime
-# Note: This requires the FocusDiff dependencies and model to be installed locally.
-processor = ImageInversionProcessor()
 
-# Assumed directory for source images
-SOURCE_IMAGE_DIR = "./scenes_360"
+@lru_cache(maxsize=3)
+def get_focusdiff(version: str, device: Optional[str], dtype: str, cache_dir: Optional[str], local_files_only: bool):
+    config = FocusDiffConfig(
+        torch_dtype=dtype,
+        cache_dir=cache_dir,
+        local_files_only=local_files_only,
+    )
+    if device is not None:
+        config.device = device
+    return FocusDiff(version=version, config=config, device=device)
 
-# The following code block is for demonstration purposes only.
-# In a real-world scenario, you would have your actual image files here.
-if not os.path.exists(SOURCE_IMAGE_DIR):
-    os.makedirs(SOURCE_IMAGE_DIR)
-    for i in range(1, 11):
-        dummy_image = Image.fromarray(np.full((500, 800, 3), 255, dtype=np.uint8))
-        dummy_image.save(Path(SOURCE_IMAGE_DIR) / f"{i}.jpg")
+
+async def save_upload(upload: UploadFile, path: Path):
+    content = await upload.read()
+    if not content:
+        raise HTTPException(status_code=400, detail=f"Uploaded file is empty: {upload.filename}")
+    path.write_bytes(content)
+
+
+def image_response(image) -> StreamingResponse:
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+    return StreamingResponse(buffer, media_type="image/png")
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.post("/edit_image")
-async def edit_image_api(id_image: str = Form(...), mask: UploadFile = File(...), prompt: str = Form(...)):
-    """
-    API endpoint to process an image editing request.
-    It receives id_image, a mask file, and a prompt, then returns the edited image.
-    """
-    
-    # Create a temporary directory to store uploaded files and results
-    temp_dir = tempfile.mkdtemp()
-    
-    try:
-        # 1. Check and get the path of the original image
-        source_image_path = Path(SOURCE_IMAGE_DIR) / f"{id_image}.png"
-        if id_image=="1":
-            source_image_path = Path(SOURCE_IMAGE_DIR) / f"{id_image}.jpg"
-        if not source_image_path.is_file():
-            raise HTTPException(status_code=404, detail=f"Image ID {id_image} not found.")
+async def edit_image_api(
+    image: UploadFile = File(...),
+    mask: UploadFile = File(...),
+    prompt: str = Form(...),
+    version: str = Form("sd15"),
+    device: Optional[str] = Form(None),
+    dtype: str = Form("float32"),
+    cache_dir: Optional[str] = Form(None),
+    local_files_only: bool = Form(False),
+):
+    if version not in {"sd15", "sd21", "sdxl"}:
+        raise HTTPException(status_code=400, detail="version must be one of: sd15, sd21, sdxl")
+    if dtype not in {"float32", "float16", "bfloat16"}:
+        raise HTTPException(status_code=400, detail="dtype must be one of: float32, float16, bfloat16")
 
-        # 2. Save the uploaded mask file to the temporary directory
-        mask_file_path = Path(temp_dir) / "uploaded_mask.png"
-        with open(mask_file_path, "wb") as buffer:
-            shutil.copyfileobj(mask.file, buffer)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp = Path(tmp_dir)
+        image_path = tmp / (image.filename or "image.png")
+        mask_path = tmp / (mask.filename or "mask.png")
+        await save_upload(image, image_path)
+        await save_upload(mask, mask_path)
 
-        # 3. Define the output directory for the processor
-        output_dir = Path(temp_dir)
+        focusdiff = get_focusdiff(version, device, dtype, cache_dir, local_files_only)
+        try:
+            result = focusdiff.edit_image(image_path, mask_path, prompt)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-        # 4. Run the image processing pipeline
-        # The run_pipeline method now handles all file I/O internally
-        processor.run_pipeline(
-            str(source_image_path),
-            str(mask_file_path),
-            prompt,
-            output_dir=str(output_dir)
-        )
-        
-        # 5. Construct the path to the final edited image
-        final_image_name = f"final_{source_image_path.stem}_{prompt.replace(' ', '_')}.png"
-        final_image_path = output_dir / "_panorama" / final_image_name
+    return image_response(result)
 
-        if not final_image_path.is_file():
-            raise HTTPException(status_code=500, detail="Failed to generate final image.")
-
-        # 6. Read the final image and return it as a streaming response
-        image_stream = open(final_image_path, "rb")
-        
-        return StreamingResponse(image_stream, media_type="image/png")
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    finally:
-        # 7. Clean up the temporary directory and all its contents
-        shutil.rmtree(temp_dir, ignore_errors=True)
 
 @app.post("/erase_image")
-async def erase_image_api(id_image: str = Form(...), mask: UploadFile = File(...), prompt: str = Form(...)):
-    """
-    API endpoint to process an image editing request.
-    It receives id_image, a mask file, and a prompt, then returns the edited image.
-    """
-    
-    # Create a temporary directory to store uploaded files and results
-    temp_dir = tempfile.mkdtemp()
-    
-    try:
-        # 1. Check and get the path of the original image
-        source_image_path = Path(SOURCE_IMAGE_DIR) / f"{id_image}.png"
-        if id_image=="1":
-            source_image_path = Path(SOURCE_IMAGE_DIR) / f"{id_image}.jpg"
-        if not source_image_path.is_file():
-            raise HTTPException(status_code=404, detail=f"Image ID {id_image} not found.")
+async def erase_image_api(
+    image: UploadFile = File(...),
+    mask: UploadFile = File(...),
+    version: str = Form("sd15"),
+    device: Optional[str] = Form(None),
+    dtype: str = Form("float32"),
+    cache_dir: Optional[str] = Form(None),
+    local_files_only: bool = Form(False),
+):
+    if version not in {"sd15", "sd21", "sdxl"}:
+        raise HTTPException(status_code=400, detail="version must be one of: sd15, sd21, sdxl")
+    if dtype not in {"float32", "float16", "bfloat16"}:
+        raise HTTPException(status_code=400, detail="dtype must be one of: float32, float16, bfloat16")
 
-        # 2. Save the uploaded mask file to the temporary directory
-        mask_file_path = Path(temp_dir) / "uploaded_mask.png"
-        with open(mask_file_path, "wb") as buffer:
-            shutil.copyfileobj(mask.file, buffer)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp = Path(tmp_dir)
+        image_path = tmp / (image.filename or "image.png")
+        mask_path = tmp / (mask.filename or "mask.png")
+        await save_upload(image, image_path)
+        await save_upload(mask, mask_path)
 
-        # 3. Define the output directory for the processor
-        output_dir = Path(temp_dir)
+        focusdiff = get_focusdiff(version, device, dtype, cache_dir, local_files_only)
+        try:
+            result = focusdiff.edit_image(image_path, mask_path, prompt="", do_erase=True)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-        # 4. Run the image processing pipeline
-        # The run_pipeline method now handles all file I/O internally
-        processor.run_pipeline(
-            str(source_image_path),
-            str(mask_file_path),
-            prompt,
-            output_dir=str(output_dir),
-            DoErase=True
-        )
-        
-        # 5. Construct the path to the final edited image
-        final_image_name = f"final_{source_image_path.stem}_{prompt.replace(' ', '_')}.png"
-        final_image_path = output_dir / "_panorama" / final_image_name
+    return image_response(result)
 
-        if not final_image_path.is_file():
-            raise HTTPException(status_code=500, detail="Failed to generate final image.")
-
-        # 6. Read the final image and return it as a streaming response
-        image_stream = open(final_image_path, "rb")
-        
-        return StreamingResponse(image_stream, media_type="image/png")
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    finally:
-        # 7. Clean up the temporary directory and all its contents
-        shutil.rmtree(temp_dir, ignore_errors=True)
 
 if __name__ == "__main__":
     import uvicorn
-    # Run the server with Uvicorn. The API documentation is available at http://localhost:8003/docs
+
     uvicorn.run(app, host="0.0.0.0", port=8003)
