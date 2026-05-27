@@ -6,16 +6,29 @@ from pathlib import Path
 
 import torch.nn.functional as F
 
-from torchvision.utils import save_image, make_grid
+from torchvision.utils import save_image
 from torchvision.io import read_image
 
 from diffusers import DDIMScheduler
+from focusdiff.config import FocusDiffConfig, MODEL_PRESETS
 from focusdiff.backends.sd15.diffuser_utils import FocusDiffSD15Pipeline
 from focusdiff.backends.sd15.attention_control import FocusDiffSelfAttentionControlMask
-from focusdiff.backends.sd15.config import Config as cfg
 from focusdiff.backends.sd15.attention_utils import register_attention_editor_diffusers, AttentionBase
 from focusdiff.seed import seed_everything
-from torchvision.transforms.functional import to_pil_image
+
+
+class PanoramaConfig:
+    def __init__(self, base: FocusDiffConfig = None):
+        base = base or FocusDiffConfig()
+        self.SEED = base.seed
+        self.SCALE_MASK = base.mask_scale
+        self.DEVICE = base.device
+        self.HEIGHT = MODEL_PRESETS["sd15"]["height"]
+        self.WIDTH = MODEL_PRESETS["sd15"]["width"]
+        self.MAX_STEP = base.num_inference_steps
+        self.GUIDANCE_SCALE = base.guidance_scale
+        self.STEP_QUERY = 7
+        self.LAYER_QUERY = 16
 
 
 class ImageInversionProcessor:
@@ -25,7 +38,7 @@ class ImageInversionProcessor:
     It loads the model, preprocesses input data, and generates images based on the provided parameters.
     """
 
-    def __init__(self, config=None, model_path="sd-legacy/stable-diffusion-v1-5"):
+    def __init__(self, config=None, model_path=None):
         """
         Initializes the ImageInversionProcessor with configuration and model path.
 
@@ -33,12 +46,12 @@ class ImageInversionProcessor:
             config (object): The configuration object containing parameters like DEVICE, MAX_STEP, etc.
             model_path (str): The path to the Stable Diffusion model.
         """
-        seed_everything(42)
+        self.cfg = config if config else PanoramaConfig()
+        seed_everything(self.cfg.SEED)
 
-        self.cfg = config if config else cfg
         self.device = self.cfg.DEVICE
         print(f"Using device: {self.device}")
-        self.model_path = model_path
+        self.model_path = model_path or MODEL_PRESETS["sd15"]["model_path"]
 
         self.scheduler = DDIMScheduler(
             beta_start=0.00085,
