@@ -6,12 +6,12 @@ import numpy as np
 
 from einops import rearrange
 
-from .OIIctrl_utils import AttentionBase
+from .attention_utils import AttentionBase
 
 from torchvision.utils import save_image
 
 
-class OIISelfAttentionControl(AttentionBase):
+class FocusDiffSelfAttentionControl(AttentionBase):
     def __init__(self, start_step=4, start_layer=10, layer_idx=None, step_idx=None, total_steps=50):
         """
         Original Interpolate Intermediate self-attention control for Stable-Diffusion model
@@ -61,7 +61,7 @@ class OIISelfAttentionControl(AttentionBase):
         # out = torch.cat([out_u, out_c], dim=0)
         
         # return out
-class OIISelfAttentionControlMask(OIISelfAttentionControl):
+class FocusDiffSelfAttentionControlMask(FocusDiffSelfAttentionControl):
     def __init__(self,  start_step=4, start_layer=10, layer_idx=None, 
                  step_idx=None, total_steps=50, 
                  mask=None,DoErase=False):

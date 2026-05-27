@@ -43,7 +43,7 @@ class AttentionBase:
         return out
 
 
-def regiter_attention_editor_diffusers(model, editor: AttentionBase):
+def register_attention_editor_diffusers(model, editor: AttentionBase):
     """
     Register a attention editor to Diffuser Pipeline, refer from [Prompt-to-Prompt]
     """

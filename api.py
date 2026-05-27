@@ -18,7 +18,7 @@ from run_pano import ImageInversionProcessor
 app = FastAPI()
 
 # Initialize the processor once for the application lifetime
-# Note: This requires the OIIctrl library and model to be installed locally.
+# Note: This requires the FocusDiff dependencies and model to be installed locally.
 processor = ImageInversionProcessor()
 
 # Assumed directory for source images

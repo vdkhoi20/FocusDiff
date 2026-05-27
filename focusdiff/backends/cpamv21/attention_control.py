@@ -6,17 +6,17 @@ import numpy as np
 
 from einops import rearrange
 
-from .OIIctrl_utils import AttentionBase
+from .attention_utils import AttentionBase
 
 from torchvision.utils import save_image
 
 
-class OIISelfAttentionControl(AttentionBase):
+class FocusDiffSelfAttentionControl(AttentionBase):
     MODEL_TYPE = {
         "SD": 16,
         "SDXL": 70
     }
-    def __init__(self, start_step=4, start_layer=10, layer_idx=None, step_idx=None, total_steps=50, model_type="SDXL"):
+    def __init__(self, start_step=4, start_layer=10, layer_idx=None, step_idx=None, total_steps=50, model_type="SD"):
         """
         Original Interpolate Intermediate self-attention control for Stable-Diffusion model
         Args:
@@ -55,10 +55,10 @@ class OIISelfAttentionControl(AttentionBase):
         """
         
         return super().forward(q, k, v, sim, attn, is_cross, place_in_unet, num_heads, **kwargs)
-class OIISelfAttentionControlMask(OIISelfAttentionControl):
+class FocusDiffSelfAttentionControlMask(FocusDiffSelfAttentionControl):
     def __init__(self,  start_step=4, start_layer=10, layer_idx=None, 
                  step_idx=None, total_steps=50, 
-                 mask_s=None, mask_t=None, model_type="SDXL"):
+                 mask_s=None, mask_t=None, model_type="SD"):
         """
         Maske-guided Original Interpolate Intermediate to alleviate the problem of fore- and background confusion
         Args:
@@ -147,7 +147,7 @@ class OIISelfAttentionControlMask(OIISelfAttentionControl):
             
             return out
 
-
+    
         out_intermediate,out_u_target,out_c_target=out_self_attn.chunk(3)
         
         
@@ -172,14 +172,14 @@ class OIISelfAttentionControlMask(OIISelfAttentionControl):
         out = torch.cat([out_intermediate, out_u_target,out_c_target], dim=0)
 
         return out
-class OIISelfAttentionControlMaskExpand(OIISelfAttentionControlMask):
+class FocusDiffSelfAttentionControlMaskExpand(FocusDiffSelfAttentionControlMask):
     def __init__(self,  start_step=4, start_layer=10, layer_idx=None, 
                  step_idx=None, total_steps=50, 
                  mask_s=None, 
                  mask_t=None,
                  thres_hold=0.25,
                  ref_token_ids_object=[1],
-                 step_change_mask=5, model_type="SDXL"):
+                 step_change_mask=5, model_type="SD"):
         """
         Maske-guided Original Interpolate Intermediate to alleviate the problem of fore- and background confusion
         Args:

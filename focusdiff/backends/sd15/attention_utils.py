@@ -5,10 +5,10 @@ from einops import rearrange, repeat
 from torchvision.io import read_image
 import torch.nn.functional as F
 import cv2 
+from rembg import remove
 from PIL import Image
 import numpy as np
 import io
-from torchvision.utils import save_image,make_grid
 
 
 class AttentionBase:
@@ -17,16 +17,14 @@ class AttentionBase:
         self.num_att_layers = -1
         self.cur_att_layer = 0
         self.max_step=max_step
-        
-    def reset(self):
 
+    def reset(self):
         self.cur_att_layer = 0
         self.cur_step = 0
 
     def after_step(self):
         self.cur_att_layer = 0
         self.cur_step += 1
-
         self.cur_step%=self.max_step
         if self.cur_step == 0:
             self.reset()
@@ -42,8 +40,7 @@ class AttentionBase:
         out = rearrange(out, '(b h) n d -> b n (h d)', h=num_heads)
         return out
 
-
-def regiter_attention_editor_diffusers(model, editor: AttentionBase):
+def register_attention_editor_diffusers(model, editor: AttentionBase):
     """
     Register a attention editor to Diffuser Pipeline, refer from [Prompt-to-Prompt]
     """
@@ -68,6 +65,7 @@ def regiter_attention_editor_diffusers(model, editor: AttentionBase):
             q = self.to_q(x)
             is_cross = context is not None
             context = context if is_cross else x
+            
             k = self.to_k(context)
             v = self.to_v(context)
             q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> (b h) n d', h=h), (q, k, v))
@@ -109,56 +107,4 @@ def regiter_attention_editor_diffusers(model, editor: AttentionBase):
         elif "up" in net_name:
             cross_att_count += register_editor(net, 0, "up")
     editor.num_att_layers = cross_att_count
-    print(f"Registered {cross_att_count} cross attention layers for editor.")
 
-def load_image(image_path, device):
-    image = read_image(image_path)
-    image = image[:3].unsqueeze_(0).float() / 127.5 - 1.  # [-1, 1]
-    image = F.interpolate(image, (512, 512))
-    image = image.to(device)
-    return image
-def expand_mask(mask,scale=0.15):
-    
-    object_size = torch.sum(mask)
-    kernel_size = int(torch.sqrt(object_size).item()*scale)
-    if (kernel_size==0): return mask 
-    source_mask_tensor = torch.tensor(mask.clone().detach(), dtype=torch.float32).unsqueeze(0).unsqueeze(0)  # Add batch and channel dimensions
-
-    dilation = torch.ones(1, 1, kernel_size, kernel_size).to(source_mask_tensor.device) 
-    
-    expanded_mask_tensor = F.conv2d(source_mask_tensor, dilation, padding=kernel_size//2)
-    expanded_mask_tensor = torch.where(expanded_mask_tensor > 0, torch.tensor(1.0).to(source_mask_tensor.device), torch.tensor(0.0).to(source_mask_tensor.device))
-    expanded_mask = expanded_mask_tensor.squeeze()
-
-    return expanded_mask
-def get_ref_object_token_ids(model,sentence,object):
-    prompt=[sentence,object]
-
-    ids = model.tokenizer(
-            prompt, # todo
-            padding="max_length",
-            max_length=77,
-            return_tensors="pt"
-        )
-    # print(ids['input_ids'],sentence,object)
-    object_token_ids=ids['input_ids'][1]
-    padding_token_id=object_token_ids[-1].item()
-    ref_tokens_object=[]
-    for token in object_token_ids[1:]:
-
-        if token==padding_token_id:
-            break
-        ref_tokens_object.append(token.item())
-    ref_tokens_object=torch.tensor(ref_tokens_object)
-
-    sentence_token_ids=ids['input_ids'][0]
-
-    for first_id in range(len(sentence_token_ids) - len(ref_tokens_object) + 1):
-        if torch.equal(sentence_token_ids[first_id:first_id+len(ref_tokens_object)], ref_tokens_object):
-            break
-    assert first_id<len(sentence_token_ids)-1,"token object must is a sequence of sentence"
-    return list(range(first_id,first_id+len(ref_tokens_object)))
-def save_image_pil(tensor, filename):
-    img = tensor.mul(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to("cpu", torch.uint8).numpy()
-    img_pil = Image.fromarray(img)
-    img_pil.save(filename)

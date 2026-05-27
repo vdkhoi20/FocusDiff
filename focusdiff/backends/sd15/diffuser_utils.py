@@ -10,7 +10,7 @@ from diffusers import StableDiffusionPipeline
 
 
 
-class OIICtrlPipeline(StableDiffusionPipeline):
+class FocusDiffSD15Pipeline(StableDiffusionPipeline):
 
     def next_step(
         self,

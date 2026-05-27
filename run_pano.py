@@ -10,10 +10,10 @@ from torchvision.utils import save_image, make_grid
 from torchvision.io import read_image
 
 from diffusers import DDIMScheduler
-from focusdiff.backends.sd15.diffuser_utils import OIICtrlPipeline
-from focusdiff.backends.sd15.OIIctrl import OIISelfAttentionControlMask
+from focusdiff.backends.sd15.diffuser_utils import FocusDiffSD15Pipeline
+from focusdiff.backends.sd15.attention_control import FocusDiffSelfAttentionControlMask
 from focusdiff.backends.sd15.config import Config as cfg
-from focusdiff.backends.sd15.OIIctrl_utils import regiter_attention_editor_diffusers, AttentionBase
+from focusdiff.backends.sd15.attention_utils import register_attention_editor_diffusers, AttentionBase
 from focusdiff.seed import seed_everything
 from torchvision.transforms.functional import to_pil_image
 
@@ -47,7 +47,7 @@ class ImageInversionProcessor:
             clip_sample=False,
             set_alpha_to_one=False
         )
-        self.model = OIICtrlPipeline.from_pretrained(
+        self.model = FocusDiffSD15Pipeline.from_pretrained(
             self.model_path, scheduler=self.scheduler
         ).to(self.device)
 
@@ -218,7 +218,7 @@ class ImageInversionProcessor:
         image_object_norm = self._normalize_image(image_object).to(self.device)
         
         editor = AttentionBase()
-        regiter_attention_editor_diffusers(self.model, editor)
+        register_attention_editor_diffusers(self.model, editor)
         
         start_code_object, intermediate_objects = self.model.invert(
             image_object_norm,
@@ -250,12 +250,12 @@ class ImageInversionProcessor:
         """
         Main image generation step: uses preprocessed data to generate and save images.
         """
-        editor = OIISelfAttentionControlMask(
+        editor = FocusDiffSelfAttentionControlMask(
             start_step=self.cfg.STEP_QUERY, start_layer=self.cfg.LAYER_QUERY,
             mask=preprocessed_data["source_mask_expanded"], total_steps=self.cfg.MAX_STEP,
             DoErase=DoErase
         )
-        regiter_attention_editor_diffusers(self.model, editor)
+        register_attention_editor_diffusers(self.model, editor)
 
         prompts = ["", "", "", "", preprocessed_data["target_prompt"]]
         image_result = self.model(

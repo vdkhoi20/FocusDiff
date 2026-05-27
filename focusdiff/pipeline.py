@@ -51,7 +51,7 @@ class FocusDiff:
         }
         load_kwargs = {key: value for key, value in load_kwargs.items() if value is not None}
         if self.version == "sd15":
-            from .backends.sd15.diffuser_utils import OIICtrlPipeline
+            from .backends.sd15.diffuser_utils import FocusDiffSD15Pipeline
 
             scheduler = DDIMScheduler(
                 beta_start=0.00085,
@@ -60,7 +60,7 @@ class FocusDiff:
                 clip_sample=False,
                 set_alpha_to_one=False,
             )
-            return OIICtrlPipeline.from_pretrained(
+            return FocusDiffSD15Pipeline.from_pretrained(
                 self.model_path,
                 scheduler=scheduler,
                 safety_checker=None,
@@ -108,20 +108,20 @@ class FocusDiff:
 
     def _register_empty_editor(self):
         if self.version == "sd15":
-            from .backends.sd15.OIIctrl_utils import AttentionBase, regiter_attention_editor_diffusers
+            from .backends.sd15.attention_utils import AttentionBase, register_attention_editor_diffusers
         elif self.version == "sd21":
-            from .backends.cpamv21.OIIctrl_utils import AttentionBase, regiter_attention_editor_diffusers
+            from .backends.cpamv21.attention_utils import AttentionBase, register_attention_editor_diffusers
         else:
-            from .backends.cpamvxl.OIIctrl_utils import AttentionBase, regiter_attention_editor_diffusers
-        regiter_attention_editor_diffusers(self.model, AttentionBase(self.config.num_inference_steps))
+            from .backends.cpamvxl.attention_utils import AttentionBase, register_attention_editor_diffusers
+        register_attention_editor_diffusers(self.model, AttentionBase(self.config.num_inference_steps))
 
     def _register_focus_editor(self, mask: torch.Tensor, do_erase: bool = False):
         if self.version == "sd15":
-            from .backends.sd15.OIIctrl_utils import AttentionBase, regiter_attention_editor_diffusers
+            from .backends.sd15.attention_utils import AttentionBase, register_attention_editor_diffusers
         elif self.version == "sd21":
-            from .backends.cpamv21.OIIctrl_utils import AttentionBase, regiter_attention_editor_diffusers
+            from .backends.cpamv21.attention_utils import AttentionBase, register_attention_editor_diffusers
         else:
-            from .backends.cpamvxl.OIIctrl_utils import AttentionBase, regiter_attention_editor_diffusers
+            from .backends.cpamvxl.attention_utils import AttentionBase, register_attention_editor_diffusers
 
         editor = FocusDiffAttentionControl(
             AttentionBase,
@@ -132,7 +132,7 @@ class FocusDiff:
             do_erase=do_erase,
             model_type=self.preset["model_type"],
         )
-        regiter_attention_editor_diffusers(self.model, editor)
+        register_attention_editor_diffusers(self.model, editor)
         return editor
 
     def _invert(self, image):
