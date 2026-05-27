@@ -1,14 +1,6 @@
-
 import torch
 import torch.nn as nn
 from einops import rearrange, repeat
-from torchvision.io import read_image
-import torch.nn.functional as F
-import cv2 
-from rembg import remove
-from PIL import Image
-import numpy as np
-import io
 
 
 class AttentionBase:
@@ -107,4 +99,3 @@ def register_attention_editor_diffusers(model, editor: AttentionBase):
         elif "up" in net_name:
             cross_att_count += register_editor(net, 0, "up")
     editor.num_att_layers = cross_att_count
-

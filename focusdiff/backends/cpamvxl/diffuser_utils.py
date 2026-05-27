@@ -1,5 +1,4 @@
 import torch
-import types
 from diffusers import DDIMInverseScheduler
 from diffusers.image_processor import PipelineImageInput
 
@@ -118,9 +117,7 @@ def invert(
 
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-import torch
 from diffusers.pipelines.stable_diffusion_xl.pipeline_output import StableDiffusionXLPipelineOutput
-from diffusers.image_processor import PipelineImageInput
 from diffusers.callbacks import MultiPipelineCallbacks, PipelineCallback
 from diffusers.utils import deprecate, replace_example_docstring
 from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion import rescale_noise_cfg, retrieve_timesteps

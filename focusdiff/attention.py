@@ -5,27 +5,15 @@ from einops import rearrange
 
 
 class FocusDiffAttentionControl:
-    MODEL_LAYERS = {"SD": 16, "SDXL": 70}
-
     def __init__(
         self,
         base_cls,
-        start_step=7,
-        start_layer=16,
-        layer_idx=None,
-        step_idx=None,
         total_steps=50,
         mask=None,
         do_erase=False,
-        model_type="SD",
     ):
         self.base = base_cls(total_steps)
         self.total_steps = total_steps
-        self.start_step = start_step
-        self.start_layer = start_layer
-        self.total_layers = self.MODEL_LAYERS.get(model_type, 16)
-        self.layer_idx = layer_idx if layer_idx is not None else list(range(start_layer, self.total_layers + 1))
-        self.step_idx = step_idx if step_idx is not None else list(range(start_step, total_steps + 1))
         self.mask = mask.float()
         self.do_erase = do_erase
         self.cur_step = 0

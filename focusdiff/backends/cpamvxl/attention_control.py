@@ -1,5 +1,3 @@
-import os
-
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -7,8 +5,6 @@ import numpy as np
 from einops import rearrange
 
 from .attention_utils import AttentionBase
-
-from torchvision.utils import save_image
 
 
 class FocusDiffSelfAttentionControl(AttentionBase):

@@ -1,7 +1,7 @@
 import json
 import types
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 import torch
 from diffusers import DDIMScheduler, StableDiffusionPipeline, StableDiffusionXLPipeline
@@ -125,12 +125,9 @@ class FocusDiff:
 
         editor = FocusDiffAttentionControl(
             AttentionBase,
-            start_step=self.config.start_step,
-            start_layer=self.config.start_layer,
             mask=mask,
             total_steps=self.config.num_inference_steps,
             do_erase=do_erase,
-            model_type=self.preset["model_type"],
         )
         register_attention_editor_diffusers(self.model, editor)
         return editor

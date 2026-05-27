@@ -1,12 +1,9 @@
 import torch
-import types
 from diffusers import DDIMInverseScheduler
 from diffusers.image_processor import PipelineImageInput
 from PIL import Image
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Union
-from PIL import Image
-import torch
 from packaging import version
 from tqdm import tqdm
 import torch.nn.functional as F

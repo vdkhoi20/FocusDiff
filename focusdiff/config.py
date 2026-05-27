@@ -17,8 +17,6 @@ class FocusDiffConfig:
     mask_scale: float = 0.1
     blur_kernel: int = 47
     blur_sigma: float = 8.0
-    start_step: int = 7
-    start_layer: int = 100
     torch_dtype: str = "float32"
     cache_dir: str = None
     local_files_only: bool = False
@@ -30,20 +28,17 @@ MODEL_PRESETS = {
         "model_type": "SD",
         "height": 512,
         "width": 512,
-        "prediction_type": None,
     },
     "sd21": {
         "model_path": "sd2-community/stable-diffusion-2-1",
         "model_type": "SD",
         "height": 768,
         "width": 768,
-        "prediction_type": "v_prediction",
     },
     "sdxl": {
         "model_path": "stabilityai/stable-diffusion-xl-base-1.0",
         "model_type": "SDXL",
         "height": 1024,
         "width": 1024,
-        "prediction_type": None,
     },
 }

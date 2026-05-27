@@ -1,9 +1,6 @@
 import os
-import io
 import shutil
 import tempfile
-import torch
-import cv2 
 import numpy as np
 from pathlib import Path
 from PIL import Image
@@ -89,7 +86,7 @@ async def edit_image_api(id_image: str = Form(...), mask: UploadFile = File(...)
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 @app.post("/erase_image")
-async def edit_image_api(id_image: str = Form(...), mask: UploadFile = File(...), prompt: str = Form(...)):
+async def erase_image_api(id_image: str = Form(...), mask: UploadFile = File(...), prompt: str = Form(...)):
     """
     API endpoint to process an image editing request.
     It receives id_image, a mask file, and a prompt, then returns the edited image.
