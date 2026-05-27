@@ -17,5 +17,5 @@ scenes_360/
 *.png
 *.pdf
 
-!BenchMark_Blur/
-!BenchMark_Blur/**
+!LIMB/
+!LIMB/**

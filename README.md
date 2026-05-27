@@ -21,8 +21,8 @@ The implementation keeps small backend adapters under `focusdiff/backends/` beca
 ```bash
 python run_focusdiff.py \
   --version sd21 \
-  --image BenchMark_Blur/Images/23.jpg \
-  --mask BenchMark_Blur/Masks/23.jpg \
+  --image LIMB/Images/23.jpg \
+  --mask LIMB/Masks/23.jpg \
   --prompt "a decorative lantern" \
   --output results/focusdiff_sd21.png
 ```
@@ -44,7 +44,7 @@ python run_focusdiff.py \
 ```bash
 python run_focusdiff.py \
   --version sd15 \
-  --dataset BenchMark_Blur \
+  --dataset LIMB \
   --output results
 ```
 
