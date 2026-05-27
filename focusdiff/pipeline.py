@@ -1,15 +1,15 @@
 import json
 import types
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional, Tuple, Union
 
 import torch
 from diffusers import DDIMScheduler, StableDiffusionPipeline, StableDiffusionXLPipeline
-from pytorch_lightning import seed_everything
 
 from .attention import FocusDiffAttentionControl
 from .config import MODEL_PRESETS, FocusDiffConfig
 from .image_utils import blur_background, expand_mask, load_binary_mask, load_rgb, pil_to_model_tensor, safe_name
+from .seed import seed_everything
 
 
 def _dtype(name: str) -> torch.dtype:
@@ -20,9 +20,9 @@ class FocusDiff:
     def __init__(
         self,
         version: str = "sd15",
-        config: FocusDiffConfig | None = None,
-        model_path: str | None = None,
-        device: str | None = None,
+        config: Optional[FocusDiffConfig] = None,
+        model_path: Optional[str] = None,
+        device: Optional[str] = None,
     ):
         if version not in MODEL_PRESETS:
             raise ValueError(f"Unknown version '{version}'. Choose one of {sorted(MODEL_PRESETS)}")
@@ -37,10 +37,15 @@ class FocusDiff:
         self.model = self._load_model()
 
     @property
-    def size(self) -> tuple[int, int]:
+    def size(self) -> Tuple[int, int]:
         return (self.config.width, self.config.height)
 
     def _load_model(self):
+        load_kwargs = {
+            "cache_dir": self.config.cache_dir,
+            "local_files_only": self.config.local_files_only,
+        }
+        load_kwargs = {key: value for key, value in load_kwargs.items() if value is not None}
         if self.version == "sd15":
             from .backends.sd15.diffuser_utils import OIICtrlPipeline
 
@@ -51,7 +56,13 @@ class FocusDiff:
                 clip_sample=False,
                 set_alpha_to_one=False,
             )
-            return OIICtrlPipeline.from_pretrained(self.model_path, scheduler=scheduler).to(self.config.device)
+            return OIICtrlPipeline.from_pretrained(
+                self.model_path,
+                scheduler=scheduler,
+                safety_checker=None,
+                requires_safety_checker=False,
+                **load_kwargs,
+            ).to(self.config.device)
 
         if self.version == "sd21":
             from .backends.cpamv21.diffuser_utils import invert
@@ -71,6 +82,7 @@ class FocusDiff:
                 torch_dtype=_dtype(self.config.torch_dtype),
                 safety_checker=None,
                 requires_safety_checker=False,
+                **load_kwargs,
             ).to(self.config.device)
             model.invert = types.MethodType(invert, model)
             model.focusdiff_call = types.MethodType(_focusdiff_call_sd, model)
@@ -83,6 +95,7 @@ class FocusDiff:
             torch_dtype=torch.float16 if self.config.torch_dtype == "float16" else _dtype(self.config.torch_dtype),
             variant="fp16" if self.config.torch_dtype == "float16" else None,
             use_safetensors=True,
+            **load_kwargs,
         ).to(self.config.device)
         model.scheduler = DDIMScheduler.from_config(model.scheduler.config)
         model.invert = types.MethodType(invert, model)
@@ -148,10 +161,10 @@ class FocusDiff:
 
     def edit_image(
         self,
-        image_path: str | Path,
-        mask_path: str | Path,
+        image_path: Union[str, Path],
+        mask_path: Union[str, Path],
         prompt: str,
-        output_path: str | Path | None = None,
+        output_path: Optional[Union[str, Path]] = None,
         do_erase: bool = False,
     ):
         image = load_rgb(image_path, self.size)
@@ -198,16 +211,16 @@ class FocusDiff:
 
     def run_dataset(
         self,
-        root_path: str | Path,
+        root_path: Union[str, Path],
         annot_file: str = "annotates.json",
         image_dir: str = "Images",
         mask_dir: str = "Masks",
-        output_dir: str | Path = "results",
-        limit: int | None = None,
+        output_dir: Union[str, Path] = "results",
+        limit: Optional[int] = None,
     ):
         root = Path(root_path)
         with open(root / annot_file) as f:
-            samples: list[dict[str, Any]] = json.load(f)
+            samples = json.load(f)  # type: List[dict]
         out_dir = Path(output_dir) / f"FocusDiff_{self.version}"
         out_dir.mkdir(parents=True, exist_ok=True)
         for idx, sample in enumerate(samples[:limit] if limit else samples):
@@ -220,8 +233,13 @@ class FocusDiff:
 
 @torch.no_grad()
 def _focusdiff_call_sd(self, prompt, latents, ref_intermediate_objects, ref_intermediates, guidance_scale=10.0, num_inference_steps=50):
-    device = self._execution_device
-    prompt_embeds, _ = self.encode_prompt(prompt, device, 1, False)
+    device = latents.device
+    prompt_embeds, _ = self.encode_prompt(
+        prompt=prompt,
+        device=device,
+        num_images_per_prompt=1,
+        do_classifier_free_guidance=False,
+    )
     self.scheduler.set_timesteps(num_inference_steps, device=device)
     latents = latents.to(device=device, dtype=prompt_embeds.dtype) * self.scheduler.init_noise_sigma
     for i, t in enumerate(self.scheduler.timesteps):
@@ -242,10 +260,16 @@ def _focusdiff_call_sd(self, prompt, latents, ref_intermediate_objects, ref_inte
 
 @torch.no_grad()
 def _focusdiff_call_sdxl(self, prompt, latents, ref_intermediate_objects, ref_intermediates, guidance_scale=10.0, num_inference_steps=50):
-    device = self._execution_device
+    device = latents.device
     height = self.default_sample_size * self.vae_scale_factor
     width = self.default_sample_size * self.vae_scale_factor
-    prompt_embeds, _, pooled_prompt_embeds, _ = self.encode_prompt(prompt, device, 1, False)
+    prompt_embeds, _, pooled_prompt_embeds, _ = self.encode_prompt(
+        prompt=prompt,
+        prompt_2=None,
+        device=device,
+        num_images_per_prompt=1,
+        do_classifier_free_guidance=False,
+    )
     self.scheduler.set_timesteps(num_inference_steps, device=device)
     latents = latents.to(device=device, dtype=prompt_embeds.dtype) * self.scheduler.init_noise_sigma
     add_time_ids = self._get_add_time_ids(

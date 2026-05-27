@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -11,7 +11,7 @@ from PIL import Image
 ImagePath = Union[str, Path]
 
 
-def load_rgb(path: ImagePath, size: tuple[int, int]) -> Image.Image:
+def load_rgb(path: ImagePath, size: Tuple[int, int]) -> Image.Image:
     return Image.open(path).convert("RGB").resize(size, Image.LANCZOS)
 
 
@@ -21,7 +21,7 @@ def pil_to_model_tensor(image: Image.Image, device: str, dtype: torch.dtype = to
     return (tensor / 127.5 - 1.0).to(device=device, dtype=dtype)
 
 
-def load_binary_mask(path: ImagePath, device: str, size: tuple[int, int] | None = None) -> torch.Tensor:
+def load_binary_mask(path: ImagePath, device: str, size: Optional[Tuple[int, int]] = None) -> torch.Tensor:
     mask = Image.open(path).convert("L")
     if size is not None:
         mask = mask.resize(size, Image.NEAREST)

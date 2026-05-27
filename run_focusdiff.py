@@ -1,6 +1,10 @@
 import argparse
+import importlib.util
 
 from focusdiff import FocusDiffConfig
+
+
+REQUIRED_MODULES = ["torch", "diffusers", "transformers", "PIL", "cv2", "einops"]
 
 
 def parse_args():
@@ -21,11 +25,32 @@ def parse_args():
     parser.add_argument("--guidance-scale", type=float, default=10.0)
     parser.add_argument("--mask-scale", type=float, default=0.1)
     parser.add_argument("--dtype", default="float32", choices=["float32", "float16", "bfloat16"])
+    parser.add_argument("--cache-dir", default=None)
+    parser.add_argument("--local-files-only", action="store_true")
+    parser.add_argument("--check-env", action="store_true", help="Check Python dependencies and exit.")
     return parser.parse_args()
+
+
+def check_env():
+    missing = []
+    for module in REQUIRED_MODULES:
+        ok = importlib.util.find_spec(module) is not None
+        print(f"{module}: {'ok' if ok else 'missing'}")
+        if not ok:
+            missing.append(module)
+    if missing:
+        raise SystemExit(f"Missing dependencies: {', '.join(missing)}")
 
 
 def main():
     args = parse_args()
+    if args.check_env:
+        check_env()
+        return
+
+    if not args.dataset and not (args.image and args.mask and args.prompt):
+        raise SystemExit("Single-image mode needs --image, --mask, and --prompt, or use --dataset.")
+
     from focusdiff import FocusDiff
 
     cfg = FocusDiffConfig(
@@ -33,6 +58,8 @@ def main():
         guidance_scale=args.guidance_scale,
         mask_scale=args.mask_scale,
         torch_dtype=args.dtype,
+        cache_dir=args.cache_dir,
+        local_files_only=args.local_files_only,
     )
     focusdiff = FocusDiff(args.version, config=cfg, model_path=args.model_path, device=args.device)
 
@@ -47,8 +74,6 @@ def main():
         )
         return
 
-    if not (args.image and args.mask and args.prompt):
-        raise SystemExit("Single-image mode needs --image, --mask, and --prompt, or use --dataset.")
     focusdiff.edit_image(args.image, args.mask, args.prompt, args.output)
 
 

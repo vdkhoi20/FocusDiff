@@ -8,13 +8,13 @@ import torch.nn.functional as F
 
 from torchvision.utils import save_image, make_grid
 from torchvision.io import read_image
-from pytorch_lightning import seed_everything
 
 from diffusers import DDIMScheduler
 from focusdiff.backends.sd15.diffuser_utils import OIICtrlPipeline
 from focusdiff.backends.sd15.OIIctrl import OIISelfAttentionControlMask
 from focusdiff.backends.sd15.config import Config as cfg
 from focusdiff.backends.sd15.OIIctrl_utils import regiter_attention_editor_diffusers, AttentionBase
+from focusdiff.seed import seed_everything
 from torchvision.transforms.functional import to_pil_image
 
 

@@ -20,6 +20,8 @@ class FocusDiffConfig:
     start_step: int = 7
     start_layer: int = 16
     torch_dtype: str = "float32"
+    cache_dir: str = None
+    local_files_only: bool = False
 
 
 MODEL_PRESETS = {

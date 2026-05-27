@@ -3,7 +3,6 @@ torchvision
 diffusers
 transformers
 accelerate
-pytorch-lightning
 einops
 opencv-python
 pillow
