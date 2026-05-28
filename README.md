@@ -112,11 +112,13 @@ LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine
   year = {2026},
 }
 
-@article{vo2025cpam,
+@article{vo2026cpam,
   title = {CPAM: Context-Preserving Adaptive Manipulation for Zero-Shot Real Image Editing},
   author = {Vo, Dinh-Khoi and Do, Thanh-Toan and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
-  journal = {arXiv preprint arXiv:2506.18438},
-  year = {2025}
+  journal = {IEEE Transactions on Multimedia},
+  year = {2026},
+  url = {https://arxiv.org/abs/2506.18438},
+  code = {https://github.com/vdkhoi20/CPAM}
 }
 
 @inproceedings{vo2024icontra,
