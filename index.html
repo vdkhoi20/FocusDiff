@@ -8,16 +8,20 @@
       content="FocusDiff: Target-Aware Refocusing for Tuning-Free Diffusion Editing and 360-degree indoor panorama editing."
     />
     <title>FocusDiff: Target-Aware Refocusing for Tuning-Free Diffusion Editing</title>
-    <link rel="stylesheet" href="web/styles.css?v=20260528-2" />
+    <link rel="icon" href="web/assets/focusdiff-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="web/assets/focusdiff-icon.svg" />
+    <link rel="stylesheet" href="web/styles.css?v=20260528-3" />
   </head>
   <body>
     <main>
       <section class="hero paper-section">
         <div class="container center">
           <h1>
-            <span class="title-main">FocusDiff</span>
-            <span class="title-sub">: Target-Aware Refocusing</span>
-            <span class="title-line">for Tuning-Free Diffusion Editing</span>
+            <span class="title-wrap">
+              <span class="title-main">FocusDiff</span>
+              <img class="title-icon" src="web/assets/focusdiff-icon.svg" alt="" />
+              <span class="title-sub">: Target-Aware Refocusing for Tuning-Free Diffusion Editing</span>
+            </span>
           </h1>
 
           <p class="conference">ICCCI 2026 Submission</p>
@@ -43,9 +47,9 @@
           </p>
 
           <div class="link-row" aria-label="Project links">
-            <a class="button red muted-button" href="#bibtex">Paper Soon</a>
+            <span class="button red muted-button" aria-disabled="true">Paper Soon</span>
             <a class="button dark" href="https://github.com/vdkhoi20/FocusDiff">Code</a>
-            <a class="button amber muted-button" href="#demo">Demo Soon</a>
+            <span class="button amber muted-button" aria-disabled="true">Demo Soon</span>
             <a class="button blue" href="#bibtex">BibTeX</a>
           </div>
 
@@ -251,9 +255,77 @@
         </div>
       </section>
 
+      <section class="paper-section" id="related">
+        <div class="container">
+          <h2 class="center-title gradient-heading">Related Projects & Citations</h2>
+          <p class="lead">
+            FocusDiff builds on the same line of tuning-free diffusion editing research as CPAM and related systems for
+            localized manipulation, object removal, and interactive concept transfer.
+          </p>
+          <div class="citation-grid">
+            <article class="citation-card">
+              <h3>CPAM (2025)</h3>
+              <pre><code>@article{vo2025cpam,
+  title = {CPAM: Context-Preserving Adaptive Manipulation for Zero-Shot Real Image Editing},
+  author = {Vo, Dinh-Khoi and Do, Thanh-Toan and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
+  journal = {arXiv preprint arXiv:2506.18438},
+  year = {2025}
+}</code></pre>
+            </article>
+            <article class="citation-card">
+              <h3>iCONTRA (CHI EA 2024)</h3>
+              <pre><code>@inproceedings{vo2024icontra,
+  title = {iCONTRA: Toward Thematic Collection Design Via Interactive Concept Transfer},
+  author = {Vo, Dinh-Khoi and Ly, Duy-Nam and Le, Khanh-Duy and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
+  booktitle = {Extended Abstracts of the CHI Conference on Human Factors in Computing Systems},
+  year = {2024}
+}</code></pre>
+            </article>
+            <article class="citation-card">
+              <h3>EPEdit (SoICT 2024)</h3>
+              <pre><code>@inproceedings{nguyen2024epedit,
+  title = {EPEdit: Redefining Image Editing with Generative AI and User-Centric Design},
+  author = {Nguyen, Hoang-Phuc and Vo, Dinh-Khoi and Do, Trong-Le and Nguyen, Hai-Dang and Nguyen, Tan-Cong and Nguyen, Vinh-Tiep and Nguyen, Tam V. and Le, Khanh-Duy and Tran, Minh-Triet and Le, Trung-Nghia},
+  booktitle = {International Symposium on Information and Communication Technology},
+  year = {2024}
+}</code></pre>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section shaded" id="acknowledgment">
+        <div class="container">
+          <h2 class="center-title gradient-heading">Acknowledgment</h2>
+          <div class="ack-grid">
+            <article class="ack-card funding-card">
+              <h3>Funding and GPU Support</h3>
+              <p>
+                This research is funded by Vietnam National University - Ho Chi Minh City (VNU-HCM) under Grant Number
+                B2026-18-17. Experiments were conducted on NVIDIA A100 GPU resources.
+              </p>
+            </article>
+            <article class="ack-card participant-card">
+              <h3>User Study Participants</h3>
+              <p>
+                We thank all participants who joined the VR-based panoramic editing user study and provided valuable
+                feedback on object replacement, object removal, and system usability.
+              </p>
+            </article>
+            <article class="ack-card design-card">
+              <h3>Website Design Inspiration</h3>
+              <p>
+                This project page follows the academic layout style of CPAM and related diffusion-editing project pages,
+                with a FocusDiff-specific visual identity and paper assets.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section class="paper-section" id="bibtex">
         <div class="container">
-          <h2 class="center-title">BibTeX</h2>
+          <h2 class="center-title gradient-heading">BibTeX</h2>
           <pre><code>@inproceedings{vo2026focusdiff,
   title = {Toward 360-Degree Indoor Panorama Editing via Tuning-Free Diffusion Model with Refocusing Cross-Attention},
   author = {Vo, Dinh-Khoi and Le-Hinh, Nhut-Thanh and Huynh, Viet-Tham and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},

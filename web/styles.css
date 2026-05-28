@@ -76,23 +76,37 @@ p {
 }
 
 h1 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
   margin: 0 0 14px;
   font-weight: 400;
-  line-height: 1.16;
+  line-height: 1.18;
   letter-spacing: 0;
 }
 
-.title-main {
-  color: #000000;
-  font-size: 2.75rem;
+.title-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 1120px;
 }
 
-.title-sub,
-.title-line {
+.title-main {
+  color: transparent;
+  background: linear-gradient(90deg, #111827 0%, #facc15 48%, #06b6d4 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-size: 2.75rem;
+  font-weight: 500;
+}
+
+.title-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+}
+
+.title-sub {
   color: var(--cyan);
   font-size: 2.25rem;
 }
@@ -149,6 +163,9 @@ h1 {
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 116px;
   padding: 10px 20px;
   border-radius: 8px;
@@ -180,8 +197,9 @@ h1 {
 }
 
 .muted-button {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.78;
+  pointer-events: none;
 }
 
 .teaser {
@@ -241,6 +259,15 @@ h2 {
 
 .center-title {
   text-align: center;
+}
+
+.center-title,
+.two-column h2,
+.gradient-heading {
+  color: transparent;
+  background: linear-gradient(90deg, #111827 0%, #facc15 42%, #06b6d4 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .figure-card {
@@ -375,6 +402,57 @@ thead {
   max-width: 760px;
 }
 
+.citation-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.citation-card,
+.ack-card {
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.citation-card h3,
+.ack-card h3 {
+  margin: 0 0 12px;
+  color: #1f2937;
+  font-size: 1.12rem;
+}
+
+.citation-card pre {
+  background: #f8fafc;
+}
+
+.ack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.ack-card p {
+  margin: 0;
+  color: #374151;
+}
+
+.funding-card {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.participant-card {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.design-card {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
 pre {
   margin: 0;
   padding: 22px;
@@ -392,15 +470,20 @@ pre {
     font-size: 2.2rem;
   }
 
-  .title-sub,
-  .title-line {
+  .title-sub {
     font-size: 1.65rem;
+  }
+
+  .title-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .two-column,
   .method-grid,
   .image-grid,
-  .benchmark {
+  .benchmark,
+  .ack-grid {
     grid-template-columns: 1fr;
   }
 
@@ -423,9 +506,13 @@ pre {
     font-size: 1.9rem;
   }
 
-  .title-sub,
-  .title-line {
+  .title-sub {
     font-size: 1.35rem;
+  }
+
+  .title-icon {
+    width: 34px;
+    height: 34px;
   }
 
   .authors {
