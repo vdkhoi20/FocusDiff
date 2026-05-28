@@ -5,188 +5,263 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="FocusDiff: tuning-free localized image and 360-degree panorama editing with refocusing cross-attention."
+      content="FocusDiff: Target-Aware Refocusing for Tuning-Free Diffusion Editing and 360-degree indoor panorama editing."
     />
-    <title>FocusDiff | Tuning-Free Localized Image Editing</title>
+    <title>FocusDiff: Target-Aware Refocusing for Tuning-Free Diffusion Editing</title>
     <link rel="stylesheet" href="web/styles.css" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="#top">FocusDiff</a>
-      <nav aria-label="Primary navigation">
-        <a href="#method">Method</a>
-        <a href="#results">Results</a>
-        <a href="#panorama">Panorama</a>
-        <a href="#limb">LIMB</a>
-      </nav>
-    </header>
+    <main>
+      <section class="hero paper-section">
+        <div class="container center">
+          <h1>
+            <span class="title-main">FocusDiff</span>
+            <span class="title-sub">: Target-Aware Refocusing</span>
+            <span class="title-line">for Tuning-Free Diffusion Editing</span>
+          </h1>
 
-    <main id="top">
-      <section class="hero">
-        <img src="web/assets/teaser.webp" alt="FocusDiff localized editing examples" />
-        <div class="hero-shade"></div>
-        <div class="hero-content">
-          <p class="venue">ICCCI 2026 Submission</p>
-          <h1>FocusDiff</h1>
-          <p class="subtitle">Target-Aware Refocusing for Tuning-Free Diffusion Editing</p>
-          <p class="hero-copy">
-            Precise region-specific edits from simple prompts, preserving surrounding content while extending naturally
-            to 360-degree indoor panorama editing for VR environments.
-          </p>
+          <p class="conference">ICCCI 2026 Submission</p>
+
           <div class="authors">
-            <span>Dinh-Khoi Vo</span>
-            <span>Nhut-Thanh Le-Hinh</span>
-            <span>Viet-Tham Huynh</span>
-            <span>Tam V. Nguyen</span>
-            <span>Minh-Triet Tran</span>
-            <span>Trung-Nghia Le</span>
+            <a href="https://orcid.org/0000-0001-8831-8846">Dinh-Khoi Vo</a><sup>1,2</sup>
+            <a href="https://orcid.org/0009-0001-7199-3180">Nhut-Thanh Le-Hinh</a><sup>1,2</sup>
+            <a href="https://orcid.org/0000-0002-8537-1331">Viet-Tham Huynh</a><sup>1,2</sup>
+            <a href="https://orcid.org/0000-0003-0236-7992">Tam V. Nguyen</a><sup>3</sup>
+            <a href="https://orcid.org/0000-0003-3046-3041">Minh-Triet Tran</a><sup>1,2</sup>
+            <a href="https://orcid.org/0000-0002-7363-2610">Trung-Nghia Le</a><sup>1,2</sup>
           </div>
-          <div class="actions" aria-label="Project links">
-            <a href="https://github.com/vdkhoi20/FocusDiff">Code</a>
-            <a href="Images_in_Paper/main_iccci.tex">Paper TeX</a>
-            <a href="#results">Results</a>
+
+          <div class="affiliations">
+            <p><sup>1</sup>University of Science, Ho Chi Minh, Vietnam</p>
+            <p><sup>2</sup>Vietnam National University, Ho Chi Minh, Vietnam</p>
+            <p><sup>3</sup>University of Dayton, Ohio, United States</p>
+          </div>
+
+          <p class="emails">
+            {vdkhoi,lhnthanh,hvtham}@selab.hcmus.edu.vn,
+            tamnguyen@udayton.edu, {tmtriet,ltnghia}@fit.hcmus.edu.vn
+          </p>
+
+          <div class="link-row" aria-label="Project links">
+            <a class="button red" href="Images_in_Paper/main_iccci.tex">Paper TeX</a>
+            <a class="button dark" href="https://github.com/vdkhoi20/FocusDiff">Code</a>
+            <a class="button amber muted-button" href="#demo">Demo Soon</a>
+            <a class="button blue" href="#bibtex">BibTeX</a>
+          </div>
+
+          <figure class="teaser">
+            <img src="web/assets/teaser.webp" alt="FocusDiff teaser results" />
+            <figcaption>
+              FocusDiff enables precise region-specific edits from simple prompts without fine-tuning, accurately
+              modifying small objects while preserving surrounding content and visual coherence.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="paper-section shaded">
+        <div class="container two-column">
+          <h2>Abstract</h2>
+          <p>
+            Zero-shot text-guided diffusion has significantly advanced image editing; however, practical usability
+            remains constrained by prompt brittleness, spillover edits, and failures on small or cluttered objects. We
+            propose <strong>FocusDiff</strong>, a tuning-free framework for precise region-specific image manipulation
+            based on refocusing cross-attention. Given a target region obtained through automated segmentation or manual
+            selection, FocusDiff applies selective blurring to non-edit areas to guide attention toward the masked
+            region while transferring object identity, structure, and appearance to the edited output. Context-preserving
+            modules further ensure background fidelity and global coherence. We also extend FocusDiff to 360-degree
+            indoor panorama editing and demonstrate its effectiveness within virtual reality environments.
+          </p>
+        </div>
+      </section>
+
+      <section class="paper-section shaded" id="approach">
+        <div class="container">
+          <h2 class="center-title">Approach</h2>
+          <p class="lead">
+            FocusDiff edits an input image <i>I<sub>s</sub></i> using a source object mask <i>M</i> and a target prompt
+            <i>P</i>. The image is processed in original and blurred latent flows. During denoising, refocusing
+            cross-attention extracts object semantics from the blurred branch and transfers them to the edited branch,
+            while CPAM-style context-preserving modules stabilize the unmasked background.
+          </p>
+
+          <div class="figure-card">
+            <h3>Overall Pipeline</h3>
+            <img src="Images_in_Paper/pipeline.png" alt="FocusDiff pipeline" />
+          </div>
+
+          <div class="method-grid">
+            <article>
+              <h3>Refocusing Cross-Attention</h3>
+              <p>
+                Selectively blurs non-target areas so diffusion attention concentrates on the masked object, then
+                transfers the edited object semantics back into the target latent flow.
+              </p>
+            </article>
+            <article>
+              <h3>Context-Preserving Integration</h3>
+              <p>
+                Reuses intermediate self-attention and localized extraction modules to preserve non-edited regions and
+                suppress prompt leakage outside the mask.
+              </p>
+            </article>
+            <article>
+              <h3>Panoramic Extension</h3>
+              <p>
+                Crops a region of interest from a 360-degree panorama, edits it locally, then aligns the edited patch
+                back to the panorama for immersive VR workflows.
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      <section class="metric-strip" aria-label="Project highlights">
-        <div><strong>Zero-shot</strong><span>No fine-tuning or optimization</span></div>
-        <div><strong>Localized</strong><span>Mask-guided object-level edits</span></div>
-        <div><strong>LIMB</strong><span>30 images, 100 annotations</span></div>
-        <div><strong>VR ready</strong><span>360-degree panorama workflow</span></div>
-      </section>
-
-      <section class="section abstract">
-        <div class="section-title">
-          <p>Abstract</p>
-          <h2>Editing the intended object, not the whole scene.</h2>
-        </div>
-        <div class="text-flow">
-          <p>
-            FocusDiff is a tuning-free framework for localized text-guided image editing. Given a user mask and a
-            target prompt, it refocuses diffusion attention on the selected region by selectively blurring non-editing
-            areas, then transfers the target object identity, structure, and appearance back into the edited image.
+      <section class="paper-section" id="results">
+        <div class="container wide">
+          <h2 class="center-title">Qualitative Comparison</h2>
+          <p class="lead">
+            Competing zero-shot localized editors often fail to modify small or specific objects, or introduce unintended
+            background changes. FocusDiff produces fine-grained local edits with faithful background preservation.
           </p>
-          <p>
-            The method integrates CPAM-style context preservation to keep background regions stable, reducing spillover
-            edits while remaining practical for small objects and cluttered scenes. Beyond 2D editing, FocusDiff supports
-            360-degree indoor panorama editing with a VR mask-generation interface.
+          <div class="figure-card">
+            <img src="Images_in_Paper/qualitative.png" alt="Qualitative comparison on LIMB" />
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section shaded" id="quantitative">
+        <div class="container wide">
+          <h2 class="center-title">Quantitative Comparison</h2>
+          <p class="lead">
+            We evaluate on LIMB using CLIPScore for text-image alignment and LPIPS for background preservation. The SD2.1
+            and SDXL variants demonstrate FocusDiff's generality across diffusion backbones.
           </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>CLIPScore ↑</th>
+                  <th>LPIPS ↓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>MasaCtrl</td><td>20.12</td><td>0.280</td></tr>
+                <tr><td>Blended-Diffusion</td><td>27.43</td><td>0.156</td></tr>
+                <tr><td>DiffEdit</td><td>27.75</td><td>0.148</td></tr>
+                <tr><td>LEDITS++</td><td>32.76</td><td>0.103</td></tr>
+                <tr><td>CPAM</td><td>33.45</td><td>0.101</td></tr>
+                <tr class="ours"><td>FocusDiff-SD1.5 (Ours)</td><td>35.85</td><td>0.099</td></tr>
+                <tr class="ours"><td>FocusDiff-SD2.1 (Ours)</td><td>35.61</td><td>0.068</td></tr>
+                <tr class="ours best"><td>FocusDiff-SDXL (Ours)</td><td>36.48</td><td>0.064</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <section class="section visual-band" id="method">
-        <div class="section-title compact">
-          <p>Method</p>
-          <h2>Refocusing cross-attention with context-preserving denoising.</h2>
-        </div>
-        <figure class="figure-large">
-          <img src="Images_in_Paper/pipeline.png" alt="FocusDiff method pipeline" />
-          <figcaption>
-            The source image and blurred image are inverted into latent space. During denoising, masked attention
-            transfers object semantics from the blurred latent while context-preserving modules stabilize the background.
-          </figcaption>
-        </figure>
-        <div class="method-grid">
-          <article>
-            <span>01</span>
-            <h3>Refocus</h3>
-            <p>Blur non-target regions so attention concentrates on the region the user actually wants to edit.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Transfer</h3>
-            <p>Use masked attention to transfer identity and structure from the edited object flow to the target flow.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Preserve</h3>
-            <p>Reuse context features to protect unmasked regions and maintain global coherence.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="results">
-        <div class="section-title">
-          <p>Qualitative Results</p>
-          <h2>Sharper local edits with fewer spillover artifacts.</h2>
-        </div>
-        <figure class="figure-large">
-          <img src="Images_in_Paper/qualitative.png" alt="Qualitative comparison on localized editing" />
-          <figcaption>
-            Compared with zero-shot localized editing baselines, FocusDiff better modifies small or specific target
-            objects while preserving the surrounding scene.
-          </figcaption>
-        </figure>
-        <div class="split-figures">
-          <figure>
+      <section class="paper-section" id="ablation">
+        <div class="container wide">
+          <h2 class="center-title">Ablation Study</h2>
+          <div class="figure-card">
             <img src="Images_in_Paper/ablation.png" alt="FocusDiff ablation study" />
-            <figcaption>Ablation: RCA, CPI, and blur-based refocusing each contribute to localization and preservation.</figcaption>
-          </figure>
-          <figure>
-            <img src="Images_in_Paper/SUS_result.png" alt="SUS usability result" />
-            <figcaption>VR user study reports a SUS score of 77.12/100, indicating strong usability.</figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <section class="section panorama" id="panorama">
-        <div class="section-title">
-          <p>360-degree Editing</p>
-          <h2>From localized image edits to immersive panorama workflows.</h2>
-        </div>
-        <figure class="figure-large">
-          <img src="Images_in_Paper/Overview.png" alt="Panoramic editing overview" />
-          <figcaption>
-            FocusDiff crops the region around a selected mask, edits it locally, then aligns the edited patch back into
-            the panorama to preserve global consistency.
-          </figcaption>
-        </figure>
-        <div class="split-figures">
-          <figure>
-            <img src="Images_in_Paper/VR_UI_B.png" alt="VR editing panel" />
-            <figcaption>Editing panel for choosing panoramas, entering prompts, and triggering replace/removal.</figcaption>
-          </figure>
-          <figure>
-            <img src="Images_in_Paper/VR_UI_C.png" alt="VR mask drawing canvas" />
-            <figcaption>Mask generation canvas for directly selecting target regions inside the VR scene.</figcaption>
-          </figure>
-        </div>
-        <figure class="figure-large">
-          <img src="Images_in_Paper/image_edit_quality.png" alt="Panoramic image editing results" />
-          <figcaption>Object replacement and removal cases on indoor panoramic imagery.</figcaption>
-        </figure>
-      </section>
-
-      <section class="section" id="limb">
-        <div class="section-title">
-          <p>Benchmark</p>
-          <h2>LIMB: Localized Image Manipulation Benchmark.</h2>
-        </div>
-        <div class="benchmark-layout">
-          <figure>
-            <img src="Images_in_Paper/mask_creation_process.png" alt="Mask creation process" />
-          </figure>
-          <div class="text-flow">
-            <p>
-              LIMB is curated from PIE-Bench for fine-grained localized image manipulation. It contains multi-object
-              scenes, annotated masks, and prompts designed to evaluate whether a method edits the requested target while
-              preserving the unmasked scene.
-            </p>
-            <ul class="clean-list">
-              <li><strong>30</strong> multi-object images</li>
-              <li><strong>100</strong> localized editing annotations</li>
-              <li><strong>Small-object cases</strong> for realistic failure modes</li>
-              <li><strong>Shared masks</strong> for fair comparisons with CPAM and other zero-shot editors</li>
-            </ul>
           </div>
+          <div class="table-wrap compact-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Configuration</th>
+                  <th>CLIPScore ↑</th>
+                  <th>LPIPS ↓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="ours best"><td>FocusDiff-SD1.5 (Full Framework)</td><td>35.85</td><td>0.099</td></tr>
+                <tr><td>FocusDiff w/o RCA</td><td>31.42</td><td>0.145</td></tr>
+                <tr><td>FocusDiff w/o CPI</td><td>36.12</td><td>0.284</td></tr>
+                <tr><td>Baseline w/o Blurring Surrounding</td><td>29.80</td><td>0.312</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section shaded" id="panorama">
+        <div class="container wide">
+          <h2 class="center-title">360-Degree Panorama Editing</h2>
+          <p class="lead">
+            FocusDiff extends naturally to indoor panoramic images by cropping the target region, editing it locally, and
+            blending it back into the full panorama. The VR interface supports mask drawing, object replacement, object
+            removal, and preview inside an immersive scene.
+          </p>
+          <div class="figure-card">
+            <h3>Panoramic Editing Pipeline</h3>
+            <img src="Images_in_Paper/Overview.png" alt="Panoramic editing pipeline" />
+          </div>
+          <div class="image-grid">
+            <figure class="figure-card">
+              <img src="Images_in_Paper/VR_UI_B.png" alt="VR editing panel" />
+              <figcaption>Editing panel for choosing panoramas and prompts.</figcaption>
+            </figure>
+            <figure class="figure-card">
+              <img src="Images_in_Paper/VR_UI_C.png" alt="VR mask generation canvas" />
+              <figcaption>Mask generation canvas for selecting target regions.</figcaption>
+            </figure>
+          </div>
+          <div class="figure-card">
+            <img src="Images_in_Paper/image_edit_quality.png" alt="Panoramic image editing results" />
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section" id="benchmark">
+        <div class="container">
+          <h2 class="center-title">LIMB Benchmark</h2>
+          <div class="benchmark">
+            <div class="figure-card">
+              <img src="Images_in_Paper/mask_creation_process.png" alt="Mask creation process" />
+            </div>
+            <div>
+              <p>
+                LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine-grained region-specific
+                editing. It contains multi-object scenes and annotations designed to evaluate whether a method edits the
+                requested target while preserving the rest of the image.
+              </p>
+              <ul>
+                <li><strong>30</strong> multi-object images</li>
+                <li><strong>100</strong> localized editing annotations</li>
+                <li>Challenging small-object and cluttered-scene cases</li>
+                <li>Shared masks and prompts for fair comparison</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section shaded" id="demo">
+        <div class="container">
+          <h2 class="center-title">VR User Study</h2>
+          <p class="lead">
+            The VR panoramic editing system obtains an overall System Usability Scale score of 77.12/100, indicating
+            strong usability for interactive object replacement and removal tasks.
+          </p>
+          <div class="figure-card small-figure">
+            <img src="Images_in_Paper/SUS_result.png" alt="SUS usability result" />
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section" id="bibtex">
+        <div class="container">
+          <h2 class="center-title">BibTeX</h2>
+          <pre><code>@inproceedings{vo2026focusdiff,
+  title = {Toward 360-Degree Indoor Panorama Editing via Tuning-Free Diffusion Model with Refocusing Cross-Attention},
+  author = {Vo, Dinh-Khoi and Le-Hinh, Nhut-Thanh and Huynh, Viet-Tham and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
+  booktitle = {International Conference on Computational Collective Intelligence},
+  year = {2026}
+}</code></pre>
         </div>
       </section>
     </main>
-
-    <footer>
-      <p>FocusDiff: Toward 360-Degree Indoor Panorama Editing via Tuning-Free Diffusion Model with Refocusing Cross-Attention</p>
-      <a href="#top">Back to top</a>
-    </footer>
   </body>
 </html>
