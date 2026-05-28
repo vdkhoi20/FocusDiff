@@ -21,3 +21,4 @@ scenes_360/
 !LIMB/**
 !Images_in_Paper/
 !Images_in_Paper/**
+Images_in_Paper/*.tex
