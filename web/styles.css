@@ -118,15 +118,30 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 4px 0 22px;
-  padding: 10px 20px;
+  gap: 14px;
+  margin: 10px 0 28px;
+  padding: 16px 28px;
   color: #ffffff;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 800;
   line-height: 1.2;
   background: var(--focus-gradient);
   border-radius: 8px;
-  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.16);
+  box-shadow: 0 16px 34px rgba(17, 24, 39, 0.2);
+}
+
+.conference span {
+  padding: 6px 10px;
+  color: #111827;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 6px;
+}
+
+.conference strong {
+  font-size: 1.75rem;
+  font-weight: 900;
 }
 
 .authors {
@@ -588,6 +603,14 @@ pre {
   .authors {
     gap: 6px 12px;
     font-size: 0.98rem;
+  }
+
+  .conference {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 1.25rem;
   }
 
   .link-row {
