@@ -223,6 +223,10 @@ h1 {
   background: #2563eb;
 }
 
+.green {
+  background: #16a34a;
+}
+
 .muted-button {
   cursor: not-allowed;
   opacity: 0.78;
