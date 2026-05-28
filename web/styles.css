@@ -5,6 +5,7 @@
   --line: #d1d5db;
   --blue: #0369a1;
   --cyan: #0891b2;
+  --focus-gradient: linear-gradient(90deg, #111827 0%, #ef4444 34%, #10b981 68%, #4338ca 100%);
   --red: #b91c1c;
   --amber: #ca8a04;
   --green: #047857;
@@ -78,7 +79,7 @@ p {
 h1 {
   margin: 0 0 14px;
   font-weight: 400;
-  line-height: 1.18;
+  line-height: 1.12;
   letter-spacing: 0;
 }
 
@@ -86,29 +87,30 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   max-width: 1120px;
+  white-space: nowrap;
 }
 
 .title-main {
   color: transparent;
-  background: linear-gradient(90deg, #111827 0%, #facc15 48%, #06b6d4 100%);
+  background: var(--focus-gradient);
   background-clip: text;
   -webkit-background-clip: text;
-  font-size: 2.75rem;
+  font-size: 2.35rem;
   font-weight: 500;
 }
 
 .title-icon {
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
 }
 
 .title-sub {
-  color: var(--cyan);
-  font-size: 2.25rem;
+  color: #334155;
+  font-size: 1.62rem;
 }
 
 .conference {
@@ -265,7 +267,7 @@ h2 {
 .two-column h2,
 .gradient-heading {
   color: transparent;
-  background: linear-gradient(90deg, #111827 0%, #facc15 42%, #06b6d4 100%);
+  background: var(--focus-gradient);
   background-clip: text;
   -webkit-background-clip: text;
 }
@@ -466,6 +468,11 @@ pre {
 }
 
 @media (max-width: 900px) {
+  .title-wrap {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
   .title-main {
     font-size: 2.2rem;
   }
