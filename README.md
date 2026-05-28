@@ -89,6 +89,7 @@ LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine
 ## Related Projects
 
 - [PANDORA: Zero-Shot Object Removal](https://vdkhoi20.github.io/PANDORA/)
+- [CPAM: Context-Preserving Adaptive Manipulation](https://vdkhoi20.github.io/CPAM/)
 
 ```bibtex
 @inproceedings{Vo2026ICME,
