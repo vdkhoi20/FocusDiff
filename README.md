@@ -90,6 +90,22 @@ LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine
 
 - [PANDORA: Zero-Shot Object Removal](https://vdkhoi20.github.io/PANDORA/)
 
+```bibtex
+@inproceedings{Vo2026ICME,
+  title = {PANDORA: Pixel-wise Attention Dissolution and Latent Guidance for Zero-Shot Object Removal},
+  author = {Vo, Dinh-Khoi and Nguyen, Van-Loc and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
+  booktitle = {IEEE International Conference on Multimedia and Expo (ICME)},
+  year = {2026},
+}
+
+@inproceedings{Vo2026DemoICME,
+  title = {Zero-Shot Mass-Similar and Multi-Object Removal in Single Pass},
+  author = {Dinh-Khoi Vo and Van-Loc Nguyen and Tam V. Nguyen and Minh-Triet Tran and Trung-Nghia Le},
+  booktitle = {IEEE International Conference on Multimedia and Expo (ICME)},
+  year = {2026},
+}
+```
+
 ## BibTeX
 
 ```bibtex
