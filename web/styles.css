@@ -224,7 +224,8 @@ h1 {
 }
 
 .green {
-  background: #16a34a;
+  background: var(--green);
+  color: #ffffff;
 }
 
 .muted-button {
