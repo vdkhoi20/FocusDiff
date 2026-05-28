@@ -115,9 +115,18 @@ h1 {
 }
 
 .conference {
-  margin: 0 0 18px;
-  color: var(--muted);
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 22px;
+  padding: 10px 20px;
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.2;
+  background: var(--focus-gradient);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.16);
 }
 
 .authors {

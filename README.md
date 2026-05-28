@@ -5,6 +5,9 @@
 [![Project Page](https://img.shields.io/badge/Project-Page-0ea5e9)](https://vdkhoi20.github.io/FocusDiff/)
 [![Code](https://img.shields.io/badge/Code-GitHub-111827)](https://github.com/vdkhoi20/FocusDiff)
 [![Benchmark](https://img.shields.io/badge/Benchmark-LIMB-16a34a)](#limb-benchmark)
+[![Accepted](https://img.shields.io/badge/Accepted-ICCCI%202026-ef4444)](#)
+
+**Accepted to ICCCI 2026**
 
 FocusDiff is a tuning-free localized image editing framework for precise region-specific manipulation. It refocuses diffusion attention on the user-selected target by selectively blurring non-editing areas, then transfers object identity, structure, and appearance back to the edited image while preserving the surrounding context.
 
