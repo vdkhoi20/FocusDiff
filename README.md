@@ -1,6 +1,6 @@
 # FocusDiff
 
-**Target-Aware Refocusing for Tuning-Free Diffusion Editing**
+**Toward 360-Degree Indoor Panorama Editing via Tuning-Free Diffusion Model with Refocusing Cross-Attention**
 
 [![Project Page](https://img.shields.io/badge/Project-Page-0ea5e9)](https://vdkhoi20.github.io/FocusDiff/)
 [![Code](https://img.shields.io/badge/Code-GitHub-111827)](https://github.com/vdkhoi20/FocusDiff)
@@ -85,6 +85,10 @@ The dataset runner expects `annotates.json`, `Images/`, and `Masks/`. Each annot
 ## LIMB Benchmark
 
 LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine-grained region-specific editing. It contains 30 multi-object images and 100 localized editing annotations, including challenging small-object cases.
+
+## Related Projects
+
+- [PANDORA: Zero-Shot Object Removal](https://vdkhoi20.github.io/PANDORA/)
 
 ## BibTeX
 

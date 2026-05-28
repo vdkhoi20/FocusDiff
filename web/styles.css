@@ -87,10 +87,10 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 8px;
-  max-width: 1120px;
-  white-space: nowrap;
+  max-width: 1080px;
+  white-space: normal;
 }
 
 .title-main {
@@ -98,19 +98,20 @@ h1 {
   background: var(--focus-gradient);
   background-clip: text;
   -webkit-background-clip: text;
-  font-size: 2.35rem;
+  font-size: 2.8rem;
   font-weight: 500;
 }
 
 .title-icon {
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
   flex: 0 0 auto;
 }
 
 .title-sub {
   color: #334155;
-  font-size: 1.62rem;
+  max-width: 980px;
+  font-size: 2.1rem;
 }
 
 .conference {
@@ -381,12 +382,20 @@ thead {
 }
 
 .benchmark {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 28px;
-  align-items: start;
   max-width: 980px;
   margin: 0 auto;
+}
+
+.text-benchmark {
+  display: grid;
+  gap: 20px;
+}
+
+.benchmark-card {
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 
 .benchmark p {
@@ -394,10 +403,35 @@ thead {
   font-size: 1.05rem;
 }
 
-.benchmark ul {
+.benchmark-card p {
   margin: 0;
-  padding-left: 22px;
-  color: #1f2937;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stat-grid div {
+  min-height: 116px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.stat-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.stat-grid span {
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .small-figure {
@@ -408,6 +442,25 @@ thead {
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
+}
+
+.project-link-card {
+  max-width: 900px;
+  margin: 0 auto 22px;
+  padding: 22px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.project-link-card h3 {
+  margin: 0 0 8px;
+  color: #1f2937;
+}
+
+.project-link-card p {
+  margin: 0;
+  color: #374151;
 }
 
 .citation-card,
@@ -490,6 +543,7 @@ pre {
   .method-grid,
   .image-grid,
   .benchmark,
+  .stat-grid,
   .ack-grid {
     grid-template-columns: 1fr;
   }
