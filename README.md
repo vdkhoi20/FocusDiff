@@ -91,8 +91,11 @@ LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine
 
 ## Related Projects
 
+- [FocusDiff Project Page](https://vdkhoi20.github.io/FocusDiff/)
 - [PANDORA: Zero-Shot Object Removal](https://vdkhoi20.github.io/PANDORA/)
 - [CPAM: Context-Preserving Adaptive Manipulation](https://vdkhoi20.github.io/CPAM/)
+- iCONTRA: Toward Thematic Collection Design Via Interactive Concept Transfer
+- EPEdit: Redefining Image Editing with Generative AI and User-Centric Design
 
 ```bibtex
 @inproceedings{Vo2026ICME,
@@ -107,6 +110,27 @@ LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine
   author = {Dinh-Khoi Vo and Van-Loc Nguyen and Tam V. Nguyen and Minh-Triet Tran and Trung-Nghia Le},
   booktitle = {IEEE International Conference on Multimedia and Expo (ICME)},
   year = {2026},
+}
+
+@article{vo2025cpam,
+  title = {CPAM: Context-Preserving Adaptive Manipulation for Zero-Shot Real Image Editing},
+  author = {Vo, Dinh-Khoi and Do, Thanh-Toan and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
+  journal = {arXiv preprint arXiv:2506.18438},
+  year = {2025}
+}
+
+@inproceedings{vo2024icontra,
+  title = {iCONTRA: Toward Thematic Collection Design Via Interactive Concept Transfer},
+  author = {Vo, Dinh-Khoi and Ly, Duy-Nam and Le, Khanh-Duy and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
+  booktitle = {Extended Abstracts of the CHI Conference on Human Factors in Computing Systems},
+  year = {2024}
+}
+
+@inproceedings{nguyen2024epedit,
+  title = {EPEdit: Redefining Image Editing with Generative AI and User-Centric Design},
+  author = {Nguyen, Hoang-Phuc and Vo, Dinh-Khoi and Do, Trong-Le and Nguyen, Hai-Dang and Nguyen, Tan-Cong and Nguyen, Vinh-Tiep and Nguyen, Tam V. and Le, Khanh-Duy and Tran, Minh-Triet and Le, Trung-Nghia},
+  booktitle = {International Symposium on Information and Communication Technology},
+  year = {2024}
 }
 ```
 
