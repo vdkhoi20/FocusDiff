@@ -41,11 +41,17 @@ img {
 }
 
 .paper-section {
-  padding: 48px 16px;
+  padding: 42px 16px;
 }
 
 .shaded {
   background: var(--light);
+}
+
+.hero {
+  background: #ffffff;
+  color: var(--text);
+  padding-top: 34px;
 }
 
 .container {
@@ -55,7 +61,7 @@ img {
 }
 
 .container.wide {
-  max-width: 1280px;
+  max-width: 1120px;
 }
 
 .center {
@@ -73,8 +79,8 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  margin: 0 0 18px;
+  gap: 2px;
+  margin: 0 0 14px;
   font-weight: 400;
   line-height: 1.16;
   letter-spacing: 0;
@@ -82,17 +88,17 @@ h1 {
 
 .title-main {
   color: #000000;
-  font-size: 3.2rem;
+  font-size: 2.75rem;
 }
 
 .title-sub,
 .title-line {
   color: var(--cyan);
-  font-size: 2.9rem;
+  font-size: 2.25rem;
 }
 
 .conference {
-  margin: 0 0 22px;
+  margin: 0 0 18px;
   color: var(--muted);
   font-size: 1rem;
 }
@@ -102,21 +108,25 @@ h1 {
   flex-wrap: wrap;
   justify-content: center;
   align-items: baseline;
-  gap: 8px 10px;
-  margin: 0 auto 20px;
-  max-width: 980px;
-  font-size: 1.16rem;
+  gap: 7px 20px;
+  margin: 0 auto 16px;
+  max-width: 900px;
+  font-size: 1.08rem;
+}
+
+.authors span {
+  white-space: nowrap;
 }
 
 .authors sup {
-  margin-left: -7px;
+  margin-left: 2px;
   color: var(--muted);
   font-size: 0.75rem;
 }
 
 .affiliations {
-  margin-bottom: 12px;
-  font-size: 1rem;
+  margin-bottom: 10px;
+  font-size: 0.98rem;
 }
 
 .affiliations p,
@@ -125,7 +135,7 @@ h1 {
 }
 
 .emails {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   color: #374151;
   font-style: italic;
 }
@@ -135,7 +145,7 @@ h1 {
   flex-wrap: wrap;
   justify-content: center;
   gap: 14px;
-  margin-bottom: 36px;
+  margin-bottom: 30px;
 }
 
 .button {
@@ -176,14 +186,20 @@ h1 {
 
 .teaser {
   margin: 0 auto;
-  max-width: 980px;
+  max-width: 860px;
 }
 
 .teaser img,
 .figure-card img {
   width: 100%;
   height: auto;
+  max-height: 760px;
+  object-fit: contain;
   border-radius: 8px;
+}
+
+.teaser img {
+  max-height: 560px;
 }
 
 figcaption {
@@ -201,7 +217,7 @@ figcaption {
 
 h2 {
   margin: 0 0 22px;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0;
@@ -219,7 +235,7 @@ h2 {
 }
 
 .lead {
-  max-width: 980px;
+  max-width: 900px;
   margin: 0 auto 30px;
 }
 
@@ -229,10 +245,23 @@ h2 {
 
 .figure-card {
   margin: 0 auto 28px;
-  padding: 24px;
+  max-width: 920px;
+  padding: 18px;
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.pipeline-figure {
+  max-width: 860px;
+}
+
+.paper-figure {
+  max-width: 980px;
+}
+
+.panorama-figure {
+  max-width: 1040px;
 }
 
 .figure-card h3 {
@@ -251,6 +280,9 @@ h2 {
 
 .image-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 28px;
 }
 
@@ -274,6 +306,8 @@ h2 {
 
 .table-wrap {
   overflow-x: auto;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 24px;
   background: #ffffff;
   border: 1px solid var(--line);
@@ -322,6 +356,8 @@ thead {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
   gap: 28px;
   align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 .benchmark p {
@@ -353,12 +389,12 @@ pre {
 
 @media (max-width: 900px) {
   .title-main {
-    font-size: 2.55rem;
+    font-size: 2.2rem;
   }
 
   .title-sub,
   .title-line {
-    font-size: 2.05rem;
+    font-size: 1.65rem;
   }
 
   .two-column,
@@ -384,16 +420,17 @@ pre {
   }
 
   .title-main {
-    font-size: 2.1rem;
+    font-size: 1.9rem;
   }
 
   .title-sub,
   .title-line {
-    font-size: 1.65rem;
+    font-size: 1.35rem;
   }
 
   .authors {
-    font-size: 1rem;
+    gap: 6px 12px;
+    font-size: 0.98rem;
   }
 
   .link-row {
