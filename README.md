@@ -2,6 +2,7 @@
 
 **Toward 360-Degree Indoor Panorama Editing via Tuning-Free Diffusion Model with Refocusing Cross-Attention**
 
+[![Paper](https://img.shields.io/badge/arXiv-2606.14035-b31b1b.svg)](https://arxiv.org/abs/2606.14035)
 [![Project Page](https://img.shields.io/badge/Project-Page-0ea5e9)](https://vdkhoi20.github.io/FocusDiff/)
 [![Code](https://img.shields.io/badge/Code-GitHub-111827)](https://github.com/vdkhoi20/FocusDiff)
 [![Dataset](https://img.shields.io/badge/Dataset-LIMB-16a34a)](https://github.com/vdkhoi20/FocusDiff/tree/main/LIMB)
@@ -24,11 +25,10 @@ FocusDiff is a tuning-free localized image editing framework for precise region-
 - 360-degree indoor panorama editing workflow for VR environments.
 - LIMB benchmark with 30 multi-object images and 100 localized annotations.
 
-## Project Page
+## Paper and Project Page
 
-The academic project page is available at:
-
-https://vdkhoi20.github.io/FocusDiff/
+- Paper: https://arxiv.org/abs/2606.14035
+- Project page: https://vdkhoi20.github.io/FocusDiff/
 
 The page source is the static `index.html` in this repository and uses the paper assets in `Images_in_Paper/`.
 
@@ -143,6 +143,7 @@ LIMB is a localized image manipulation benchmark curated from PIE-Bench for fine
   title = {Toward 360-Degree Indoor Panorama Editing via Tuning-Free Diffusion Model with Refocusing Cross-Attention},
   author = {Vo, Dinh-Khoi and Le-Hinh, Nhut-Thanh and Huynh, Viet-Tham and Nguyen, Tam V. and Tran, Minh-Triet and Le, Trung-Nghia},
   booktitle = {International Conference on Computational Collective Intelligence},
-  year = {2026}
+  year = {2026},
+  url = {https://arxiv.org/abs/2606.14035}
 }
 ```
